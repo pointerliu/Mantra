@@ -21,8 +21,6 @@ def visit_children(ast, node_dict=None, u_ops=None, ops=None):
         if child is not None:
             # Save the child's name and id to the dictionary
             node_dict[child.node_id] = child.__class__.__name__
-            if child.__class__.__name__ == 'Lor':
-                _a = 1
             if isinstance(child, vast.UnaryOperator):
                 u_ops.add(child.__class__)
             elif isinstance(child, vast.Operator):
