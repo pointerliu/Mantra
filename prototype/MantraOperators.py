@@ -195,14 +195,16 @@ class MantraOperators(MutationOp.MutationOp):
         return ast
         
     def SME_constant(self, ast, block_id):
+
+        def replace_recur(node: vast.Node):
+            if isinstance(node, vast.IntConst):
+                node.value = str(2333)
+                return
+            for next_new_node_child in node.children():
+                replace_recur(next_new_node_child)
+
         if ast.node_id == block_id:
-            for child in ast.children():
-                if child.__class__.__name__ == "NonblockingSubstitution" or child.__class__.__name__ == "BlockingSubstitution":
-                    for new_ndoe_child in child.children():
-                        if new_ndoe_child.__class__.__name__ == "Rvalue":
-                            for next_new_node_child in new_ndoe_child.children():
-                                if next_new_node_child.__class__.__name__ == "IntConst":
-                                    next_new_node_child.value = randint(1,100)
+            replace_recur(ast)
         for child in ast.children():
             if child is not None:
                 self.SME_constant(child, block_id)
