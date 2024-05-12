@@ -42,37 +42,20 @@ if __name__ == "__main__":
     ast, directives = parse(["test.v"])
     mutationop = MutationOp.MutationOp(None, None, None) 
     mantra_operator = MantraOperators.MantraOperators(None, None, None)
-    nodeid_name_dict = visit_children(ast)
+    nodeid_name_dict, u_ops, ops = visit_children(ast)
 
+    max_cnt = 1
+    for key, value in nodeid_name_dict.items():
+        if value == 'Assign':
+            if random.random() > 0.5:
+                ast = mantra_operator.SME_operator(ast, key, list(u_ops), list(ops))
+                max_cnt -= 1
+                if max_cnt == 0:
+                    break
 
-    for key,value in nodeid_name_dict.items():
-        #get mutation index for DMO
-        if value == "Pointer":
-            pointer_id = key
-        elif value == "Srl":
-            srl_id = key
-        elif value == "Partselect":
-            partselect_id = key
-        elif value == "Case":
-            case_id = key
-        elif value == "IfStatement":
-            if_id = key
-        elif value == "Assign":
-            assignment_id = key
-        elif value == "Reg":
-            reg_id = key
-        elif value == "Wire":
-            wire_id = key
-        elif value == "Plus":
-            plus_id = key
-        elif value == "Always":
-            always_id = key
-        elif value == "DelayStatement":
-            delay_id = key
-
-    ast.show()
-    new_ast = mantra_operator.DMO(ast, pointer_id, vast.IntConst(randint(1,100)))
+    # ast.show()
+    # new_ast = mantra_operator.DMO(ast, pointer_id, vast.IntConst(randint(1,100)))
+    # new_ast = mantra_operator.SME_constant(ast, if_id)
     codegen = ASTCodeGenerator()
     src_code = codegen.visit(ast)
     print(src_code)
-    
