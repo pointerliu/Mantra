@@ -184,8 +184,8 @@ class MantraOperators(MutationOp.MutationOp):
             self,
             ast,
             block_id,
-            optional_unary_ops: List[vast.UnaryOperator],
-            optional_ops: List[vast.Operator]
+            optional_unary_ops: List,
+            optional_ops: List,
             optional_const: List[vast.Constant]
     ):
 
@@ -200,6 +200,10 @@ class MantraOperators(MutationOp.MutationOp):
         def replace_recur(node: vast.Node):
             if isinstance(node, vast.Operator):
                 new_node = random_new_ops(node)
+                self.mutationop.replace_with_node(ast, node.node_id, new_node)
+            if isinstance(node, vast.Identifier):
+                op = random.choice(optional_ops)
+                new_node = op(right=node, left=node)
                 self.mutationop.replace_with_node(ast, node.node_id, new_node)
             if isinstance(node, vast.IntConst):
                 const = random.choice(optional_const)
