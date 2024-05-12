@@ -186,6 +186,7 @@ class MantraOperators(MutationOp.MutationOp):
             block_id,
             optional_unary_ops: List[vast.UnaryOperator],
             optional_ops: List[vast.Operator]
+            optional_const: List[vast.Constant]
     ):
 
         def random_new_ops(node: vast.Node):
@@ -200,6 +201,9 @@ class MantraOperators(MutationOp.MutationOp):
             if isinstance(node, vast.Operator):
                 new_node = random_new_ops(node)
                 self.mutationop.replace_with_node(ast, node.node_id, new_node)
+            if isinstance(node, vast.IntConst):
+                const = random.choice(optional_const)
+                self.mutationop.replace_with_node(ast, node.node_id, const)
             for child in node.children():
                 if isinstance(child, vast.Lvalue):
                     continue
@@ -211,7 +215,7 @@ class MantraOperators(MutationOp.MutationOp):
             replace_recur(ast)
         for child in ast.children():
             if child is not None:
-                self.SME_operator(child, block_id, optional_unary_ops, optional_ops)
+                self.SME_operator(child, block_id, optional_unary_ops, optional_ops, optional_const)
         return ast
         
     def SME_constant(self, ast, block_id):
