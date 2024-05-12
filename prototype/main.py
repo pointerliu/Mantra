@@ -11,7 +11,7 @@ import sys, inspect, subprocess
 import os, random
 from optparse import OptionParser
 from random import randint
- 
+
 
 class ASTCollector:
     def __init__(self):
@@ -46,7 +46,8 @@ def diff_file(text1: str, text2: str):
     res = '\n'.join(list(diff))
     return res
 
-def gen_mutation(file_name: str,n: int, max_n: int, out_path: Path):
+
+def gen_mutation(file_name: str, n: int, max_n: int, out_path: Path):
     if not out_path.exists():
         out_path.mkdir(parents=True, exist_ok=True)
 
@@ -81,6 +82,7 @@ def gen_mutation(file_name: str,n: int, max_n: int, out_path: Path):
             f.write(src_code)
         with open(out_path / f'mut_{ii}_{file_name}.diff', 'w') as f:
             f.write(diff_file(origin_code, src_code))
+
 
 if __name__ == "__main__":
     file_name = "xlnxstream_2018_3.v"
