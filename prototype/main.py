@@ -1,3 +1,8 @@
+import difflib
+import time
+from copy import deepcopy
+from pathlib import Path
+
 import MutationOp, MantraOperators
 from pyverilog.vparser.parser import parse, NodeNumbering
 import pyverilog.vparser.ast as vast
@@ -37,6 +42,11 @@ def visit_children_attr(ast):
 
 if __name__ == "__main__":
     file_name = "xlnxstream_2018_3.v"
+
+def diff_file(text1: str, text2: str):
+    diff = difflib.unified_diff(text1.splitlines(), text2.splitlines())
+    res = '\n'.join(list(diff))
+    return res
     ast, directives = parse([file_name])
     mutationop = MutationOp.MutationOp(None, None, None)
     mantra_operator = MantraOperators.MantraOperators(None, None, None)
