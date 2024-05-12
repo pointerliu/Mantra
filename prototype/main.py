@@ -8,25 +8,24 @@ from optparse import OptionParser
 from random import randint
  
 
-def visit_children(ast, node_dict=None, u_ops=None, ops=None):
-    if node_dict is None:
-        node_dict = {}
-    if u_ops is None:
-        u_ops = set()
-    if ops is None:
-        ops = set()
-    if ast is None:
-        return node_dict
-    for child in ast.children():
-        if child is not None:
-            # Save the child's name and id to the dictionary
-            node_dict[child.node_id] = child.__class__.__name__
-            if isinstance(child, vast.UnaryOperator):
-                u_ops.add(child.__class__)
-            elif isinstance(child, vast.Operator):
-                ops.add(child.__class__)
-            visit_children(child, node_dict, u_ops, ops)
-    return node_dict, u_ops, ops
+class ASTCollector:
+    def __init__(self):
+        self.node_dict = {}
+        self.u_ops = set()
+        self.ops = set()
+        self.const = set()
+
+    def visit(self, ast):
+        for child in ast.children():
+            if child is not None:
+                self.node_dict[child.node_id] = child.__class__.__name__
+                if isinstance(child, vast.UnaryOperator):
+                    self.u_ops.add(child.__class__)
+                elif isinstance(child, vast.Operator):
+                    self.ops.add(child.__class__)
+                elif isinstance(child, vast.Constant):
+                    self.const.add(child)
+                self.visit(child)
 
 
 def visit_children_attr(ast):
