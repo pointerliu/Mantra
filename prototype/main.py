@@ -40,36 +40,49 @@ def visit_children_attr(ast):
             print(vars(child))
             visit_children_attr(child)
 
-if __name__ == "__main__":
-    file_name = "xlnxstream_2018_3.v"
 
 def diff_file(text1: str, text2: str):
     diff = difflib.unified_diff(text1.splitlines(), text2.splitlines())
     res = '\n'.join(list(diff))
     return res
+
+def gen_mutation(file_name: str,n: int, max_n: int, out_path: Path):
+    if not out_path.exists():
+        out_path.mkdir(parents=True, exist_ok=True)
+
     ast, directives = parse([file_name])
-    mutationop = MutationOp.MutationOp(None, None, None)
     mantra_operator = MantraOperators.MantraOperators(None, None, None)
-    nodeid_name_dict, u_ops, ops = visit_children(ast)
+    cu = ASTCollector()
+    cu.visit(ast)
 
     mod_pos = []
-    for key, value in nodeid_name_dict.items():
+    for key, value in cu.node_dict.items():
         if value in ['BlockingSubstitution', 'Assign', 'NonblockingSubstitution']:
             mod_pos.append(key)
 
-    max_cnt = min(len(mod_pos), 10)
-    mod_pos = random.sample(mod_pos, max_cnt)
-
-    for key, value in nodeid_name_dict.items():
-        if key in mod_pos:
-            ast = mantra_operator.SME_operator(ast, key, list(u_ops), list(ops))
-
-    # ast.show()
-    # new_ast = mantra_operator.DMO(ast, pointer_id, vast.IntConst(randint(1,100)))
-    # new_ast = mantra_operator.SME_constant(ast, if_id)
     codegen = ASTCodeGenerator()
-    src_code = codegen.visit(ast)
+    origin_code = codegen.visit(ast)
+    with open(out_path / f'origin_{file_name}', 'w') as f:
+        f.write(origin_code)
 
-    with open(f'mut_{file_name}', 'w') as f:
-        f.write(src_code)
-    print(src_code)
+    max_cnt = min(len(mod_pos), max_n)
+    for ii in range(n):
+        cpy_ast = deepcopy(ast)
+
+        pos = random.sample(mod_pos, max_cnt)
+
+        for key, value in cu.node_dict.items():
+            if key in pos:
+                cpy_ast = mantra_operator.SME_operator(cpy_ast, key, list(cu.u_ops), list(cu.ops), list(cu.const))
+
+        src_code = codegen.visit(cpy_ast)
+
+        with open(out_path / f'mut_{ii}_{file_name}', 'w') as f:
+            f.write(src_code)
+        with open(out_path / f'mut_{ii}_{file_name}.diff', 'w') as f:
+            f.write(diff_file(origin_code, src_code))
+
+if __name__ == "__main__":
+    file_name = "xlnxstream_2018_3.v"
+
+    gen_mutation(file_name, 10, 1, Path("wk_dir"))
