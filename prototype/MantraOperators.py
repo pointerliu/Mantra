@@ -200,13 +200,10 @@ class MantraOperators(MutationOp.MutationOp):
             if isinstance(node, vast.Operator):
                 new_node = random_new_ops(node)
                 self.mutationop.replace_with_node(ast, node.node_id, new_node)
-            if isinstance(node, vast.Identifier):
-                op = random.choice(optional_unary_ops)
-                new_node = op(right=node)
-                self.mutationop.replace_with_node(ast, node.node_id, new_node)
-                # return
             for child in node.children():
                 if isinstance(child, vast.Lvalue):
+                    continue
+                if isinstance(child, vast.Rvalue) and isinstance(child.var, vast.Identifier):
                     continue
                 replace_recur(child)
 
