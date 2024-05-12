@@ -43,14 +43,17 @@ if __name__ == "__main__":
     mantra_operator = MantraOperators.MantraOperators(None, None, None)
     nodeid_name_dict, u_ops, ops = visit_children(ast)
 
-    max_cnt = 1
+    mod_pos = []
     for key, value in nodeid_name_dict.items():
-        if value == 'Assign':
-            if random.random() > 0.5:
-                ast = mantra_operator.SME_operator(ast, key, list(u_ops), list(ops))
-                max_cnt -= 1
-                if max_cnt == 0:
-                    break
+        if value in ['BlockingSubstitution', 'Assign', 'NonblockingSubstitution']:
+            mod_pos.append(key)
+
+    max_cnt = min(len(mod_pos), 10)
+    mod_pos = random.sample(mod_pos, max_cnt)
+
+    for key, value in nodeid_name_dict.items():
+        if key in mod_pos:
+            ast = mantra_operator.SME_operator(ast, key, list(u_ops), list(ops))
 
     # ast.show()
     # new_ast = mantra_operator.DMO(ast, pointer_id, vast.IntConst(randint(1,100)))
