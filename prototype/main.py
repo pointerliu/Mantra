@@ -39,8 +39,9 @@ def visit_children_attr(ast):
             visit_children_attr(child)
 
 if __name__ == "__main__":
-    ast, directives = parse(["test.v"])
-    mutationop = MutationOp.MutationOp(None, None, None) 
+    file_name = "xlnxstream_2018_3.v"
+    ast, directives = parse([file_name])
+    mutationop = MutationOp.MutationOp(None, None, None)
     mantra_operator = MantraOperators.MantraOperators(None, None, None)
     nodeid_name_dict, u_ops, ops = visit_children(ast)
 
@@ -58,4 +59,7 @@ if __name__ == "__main__":
     # new_ast = mantra_operator.SME_constant(ast, if_id)
     codegen = ASTCodeGenerator()
     src_code = codegen.visit(ast)
+
+    with open(f'mut_{file_name}', 'w') as f:
+        f.write(src_code)
     print(src_code)
