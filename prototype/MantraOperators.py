@@ -1,3 +1,5 @@
+from typing import List
+
 import MutationOp
 import copy
 import pyverilog.vparser.ast as vast
@@ -177,21 +179,36 @@ class MantraOperators(MutationOp.MutationOp):
     ###SRE is same with SRI
     def SRE(self, ast, else_id):
         pass
-    
-    def SME_operator(self, ast, block_id, replace_node_id):
+
+    def SME_operator(
+            self,
+            ast,
+            block_id,
+            optional_unary_ops: List[vast.UnaryOperator],
+            optional_ops: List[vast.Operator]
+    ):
+
+        def random_new_ops(node: vast.Node):
+            if isinstance(node, vast.UnaryOperator):
+                op = random.choice(optional_unary_ops)
+                return op(right=node.right)
+            elif isinstance(node, vast.Operator):
+                op = random.choice(optional_ops)
+                return op(left=node.left, right=node.right)
+
+        def replace_recur(node: vast.Node):
+            if isinstance(node, vast.Operator):
+                new_node = random_new_ops(node)
+                self.mutationop.replace_with_node(ast, node.node_id, new_node)
+                # return
+            for child in node.children():
+                replace_recur(child)
+
         if ast.node_id == block_id:
-            for child in ast.children():
-                if child.__class__.__name__ == "NonblockingSubstitution" or child.__class__.__name__ == "BlockingSubstitution":
-                    for new_ndoe_child in child.children():
-                        if new_ndoe_child.__class__.__name__ == "Rvalue":
-                            for next_new_node_child in new_ndoe_child.children():
-                                if next_new_node_child.__class__.__name__ == "Plus":
-                                    replace_node =copy.deepcopy(self.mutationop.get_node_from_ast(ast, replace_node_id))
-                                    # print(replace_node.__class__.__name__)
-                                    self.mutationop.replace_with_node(next_new_node_child, next_new_node_child.node_id, replace_node)
+            replace_recur(ast)
         for child in ast.children():
             if child is not None:
-                self.SME_operator(child, block_id, replace_node_id)
+                self.SME_operator(child, block_id, optional_unary_ops, optional_ops)
         return ast
         
     def SME_constant(self, ast, block_id):
