@@ -211,8 +211,6 @@ class MantraOperators(MutationOp.MutationOp):
             for child in node.children():
                 if isinstance(child, vast.Lvalue):
                     continue
-                if isinstance(child, vast.Rvalue) and isinstance(child.var, vast.Identifier):
-                    continue
                 replace_recur(child)
 
         if ast.node_id == block_id:
